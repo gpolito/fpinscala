@@ -76,7 +76,22 @@ object List { // `List` companion object. Contains functions for creating and wo
   def length[A](l: List[A]): Int =
     foldRight(l, 0)((x, y) => 1 + y)
 
-  def foldLeft[A,B](l: List[A], z: B)(f: (B, A) => B): B = sys.error("todo")
+  def foldLeft[A,B](l: List[A], z: B)(f: (B, A) => B): B = l match {
+    case Nil => z
+    case Cons(x, xs) => foldLeft(xs, f(z, x))(f)
+  }
+
+  def reverse[A](l: List[A]) : List[A] =
+    foldLeft(l, Nil:List[A]) ((xs, x) => Cons(x, xs))
+
+  def foldRightViaFoldLeft[A,B](as: List[A], z: B)(f: (A, B) => B): B =
+    foldLeft(reverse(as), z)((b:B, a:A) => f(a, b))
+
+  def foldLeftViaFoldRight[A,B](l: List[A], z: B)(f: (B, A) => B): B =
+    foldRight(reverse(l), z)((a: A, b: B) => f(b, a))
+
+  def appendViaFold[A](a1: List[A], a2: List[A]): List[A] =
+    foldRightViaFoldLeft(a1, a2) ((x, y) => Cons(x, y))
 
   def map[A,B](l: List[A])(f: A => B): List[B] = sys.error("todo")
 }
