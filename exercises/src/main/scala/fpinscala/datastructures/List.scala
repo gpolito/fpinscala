@@ -64,14 +64,17 @@ object List { // `List` companion object. Contains functions for creating and wo
   }
 
   def dropWhile[A](l: List[A], f: A => Boolean): List[A] = l match {
-    case Nil => Nil
     case Cons(x, xs) if (f(x)) => dropWhile(xs, f)
-    case Cons(x, xs) => Cons(x, xs)
+    case xs => xs
   }
 
-  def init[A](l: List[A]): List[A] = sys.error("todo")
+  def init[A](l: List[A]): List[A] = l match {
+    case Cons(x, Cons(y, xs)) => Cons(x, init(Cons(y, xs)))
+    case xs => Nil
+  }
 
-  def length[A](l: List[A]): Int = sys.error("todo")
+  def length[A](l: List[A]): Int =
+    foldRight(l, 0)((x, y) => 1 + y)
 
   def foldLeft[A,B](l: List[A], z: B)(f: (B, A) => B): B = sys.error("todo")
 
