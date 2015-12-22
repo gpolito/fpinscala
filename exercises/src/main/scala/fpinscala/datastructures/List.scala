@@ -91,7 +91,70 @@ object List { // `List` companion object. Contains functions for creating and wo
     foldRight(reverse(l), z)((a: A, b: B) => f(b, a))
 
   def appendViaFold[A](a1: List[A], a2: List[A]): List[A] =
-    foldRightViaFoldLeft(a1, a2) ((x, y) => Cons(x, y))
+    foldRight(a1, a2) ((x, y) => Cons(x, y))
 
-  def map[A,B](l: List[A])(f: A => B): List[B] = sys.error("todo")
+  def concat[A](l: List[List[A]]): List[A] =
+    foldRight(l, Nil:List[A])(append)
+
+  def addOneToEach(l: List[Int]) : List[Int] = l match {
+    case Nil => Nil
+    case Cons(x, xs) => Cons(x + 1, addOneToEach(xs))
+  }
+
+  def fromDoubleToStr(l: List[Double]): List[String] = l match {
+    case Nil => Nil
+    case Cons(x, xs) => Cons(x.toString(), fromDoubleToStr(xs))
+  }
+
+  def map[A,B](l: List[A])(f: A => B): List[B] = l match {
+    case Nil => Nil
+    case Cons(x, xs) => Cons(f(x), map(xs)(f))
+  }
+
+  def filter[A](as: List[A])(f: A => Boolean): List[A] = as match {
+    case Nil => Nil
+    case Cons(x, xs) if f(x) => Cons(x, filter(xs)(f))
+    case Cons(_, xs) => filter(xs)(f)
+  }
+
+  def removeOdds(l: List[Int]): List[Int] =
+    filter(l)(_ % 2 != 0)
+
+  def flatMap[A,B](as: List[A])(f: A => List[B]): List[B] = as match {
+    case Nil => Nil
+    case Cons(x, xs) => append(f(x), flatMap(xs)(f))
+  }
+
+  def filterImplWithFlatMap[A](as: List[A])(f: A => Boolean): List[A] =
+    flatMap(as)((a: A) => if (f(a)) List(a) else Nil)
+
+  def add(xs: List[Int], ys: List[Int]): List[Int] = (xs, ys) match {
+    case (Nil, yss) => yss
+    case (xss, Nil) => xss
+    case (Cons(x, xss), Cons(y, yss)) => Cons(x + y, add(xss, yss))
+  }
+
+  def zipWith[A](xs: List[A], ys: List[A])(f: (A, A) => A): List[A] = (xs, ys) match {
+    case (Nil, yss) => yss
+    case (xss, Nil) => xss
+    case (Cons(x, xss), Cons(y, yss)) => Cons(f(x, y), zipWith(xss, yss)(f))
+  }
+
+  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = {
+    def isPrefix(l: List[A], p: List[A]): Boolean = (l, p) match {
+      case (Nil, Nil) => true
+      case (Nil, _) => false
+      case (_, Nil) => true
+      case (Cons(x, xs), Cons(y, ys)) => if (x == y) isPrefix(xs, ys) else false
+
+    }
+
+    (sup, sub) match {
+      case (_, Nil) => true
+      case (Nil, _) => false
+      case (xs, ys) if (isPrefix(xs, ys)) => true
+      case (Cons(_, xs), ys) => hasSubsequence(xs, ys)
+    }
+  }
+
 }
